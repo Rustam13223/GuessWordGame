@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GuessWordGame</title>
+        <link rel="stylesheet" href="./bootstrap.min.css">
+    </head>
+
+    <body>
+        <form id="form" class="container">
+            <div class="form-group" style="text-align: center;">
+                <h2 id="secretWord" style="margin-top: 10px;"></h2>
+                <input class="form-control form-control-lg" 
+                       id="input" 
+                       autocomplete="off"
+                       style="margin-top: 10px; margin-bottom: 10px; text-align: center;">
+                <button class="btn btn-lg btn-primary" type="submit" style="width: 100%;">Guess</button>
+            </div>
+        </form>
+
+        <div class="container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                      <th scope="col">Username</th>
+                      <th scope="col">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="playerList">
+                    <tr class="table-primary">
+                        <td>Xrust</td>
+                        <td>123</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            function rand(min, max) {
+                return Math.floor(Math.random() * (max - min) + min);
+            }
+            const socket = io("http://xrusts.com");
+            const username = prompt('Input Username:').trim() || 'Anonymous'+rand(10000, 99999);
+
+            socket.emit('register', username);
+
+            const form = document.getElementById('form');
+            const input = document.getElementById('input');
+            const secretWord = document.getElementById('secretWord');
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (input.value.trim()) {
+                    socket.emit('guess', input.value);
+                    input.value = '';
+                }
+            });
+
+            socket.on('changePlayerList', (players) => {
+                const tbody = document.getElementById('playerList');
+                tbody.innerHTML = '';
+                players.list.forEach((player) => {
+                    const tr = document.createElement('tr');
+                    const td1 = document.createElement('td');
+                    const td2 = document.createElement('td');
+
+                    tr.classList.add("table-primary");
+                    
+                    td1.appendChild(document.createTextNode(`${player.username}`));
+                    td2.appendChild(document.createTextNode(`${player.score}`));
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tbody.appendChild(tr);
+                });
+            });
+
+            socket.on('changeSecretWord', (newWord) => {
+                secretWord.innerHTML = newWord;
+            });
+        </script>
+    </body>
+</html>
