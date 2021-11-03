@@ -41,7 +41,7 @@
             function rand(min, max) {
                 return Math.floor(Math.random() * (max - min) + min);
             }
-            const socket = io("http://xrusts.com");
+            const socket = io("Your HOST");
             const username = prompt('Input Username:').trim() || 'Anonymous'+rand(10000, 99999);
 
             socket.emit('register', username);
